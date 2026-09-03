@@ -8,16 +8,17 @@ import { AppValidationPipe } from './pipe/validation.pipe.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    credentials: true,
+  });
+
   app.useGlobalGuards(app.get(AuthGuard));
   app.useGlobalPipes(AppValidationPipe);
   setupSwagger(app);
   await app.listen(process.env.PORT ?? 3000);
   await seed();
-
-  app.enableCors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-  });
 
   console.log(
     'app is running on port ',

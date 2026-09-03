@@ -42,6 +42,7 @@ export class AuthService {
     const refreshToken = await this.jwtService.generateRefreshToken(payload);
 
     return {
+      user: payload,
       accessToken,
       refreshToken,
     };
