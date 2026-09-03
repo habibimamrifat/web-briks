@@ -13,7 +13,6 @@ import { AppService } from './app.service.js';
 import { JwtHelperModule } from './helpers/jwt/jwt.module.js';
 import { AuthGuard } from './guards/auth.guard.js';
 
-
 @Module({
   imports: [
     ConfigModule,
@@ -25,7 +24,7 @@ import { AuthGuard } from './guards/auth.guard.js';
     WorkflowStatesModule,
     TasksModule,
     MailModule,
-    JwtHelperModule
+    JwtHelperModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthGuard],

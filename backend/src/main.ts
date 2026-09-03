@@ -7,13 +7,17 @@ import { setupSwagger } from './helpers/swagger/swagger.js';
 import { AppValidationPipe } from './pipe/validation.pipe.js';
 
 async function bootstrap() {
-  
   const app = await NestFactory.create(AppModule);
   app.useGlobalGuards(app.get(AuthGuard));
   app.useGlobalPipes(AppValidationPipe);
   setupSwagger(app);
   await app.listen(process.env.PORT ?? 3000);
-  await seed()
+  await seed();
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
 
   console.log(
     'app is running on port ',
@@ -21,8 +25,9 @@ async function bootstrap() {
     ' in ',
     process.env.ENVIRONMENT,
     ' environment',
-    "api documentation is available at localhost:" + (process.env.PORT ?? 3000) + "/api/v1",
-
+    'api documentation is available at localhost:' +
+      (process.env.PORT ?? 3000) +
+      '/api/v1',
   );
 }
 bootstrap();

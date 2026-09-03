@@ -1,19 +1,27 @@
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateBoardDto {
+export class CreateWorkflowStateDto {
   @ApiProperty({
-    example: 'Website Redesign',
+    example: 'In Progress',
   })
   @IsString()
   name!: string;
 
   @ApiPropertyOptional({
-    example: 'Redesign the company website',
+    example: 1,
+    description: 'Position of the workflow state',
   })
-  @IsString()
+  @IsInt()
+  @Min(0)
   @IsOptional()
-  description?: string;
+  position?: number;
 
   @ApiPropertyOptional({
     example: '2026-09-05T00:00:00.000Z',
@@ -23,27 +31,29 @@ export class CreateBoardDto {
   startDate?: string;
 
   @ApiPropertyOptional({
-    example: '2026-10-05T00:00:00.000Z',
+    example: '2026-09-15T00:00:00.000Z',
   })
   @IsDateString()
   @IsOptional()
   finishDate?: string;
 }
 
-export class UpdateBoardDto {
+export class UpdateWorkflowStateDto {
   @ApiPropertyOptional({
-    example: 'Updated Website Redesign',
+    example: 'Completed',
   })
   @IsString()
   @IsOptional()
   name?: string;
 
   @ApiPropertyOptional({
-    example: 'Updated project description',
+    example: 2,
+    description: 'Position of the workflow state',
   })
-  @IsString()
+  @IsInt()
+  @Min(0)
   @IsOptional()
-  description?: string;
+  position?: number;
 
   @ApiPropertyOptional({
     example: '2026-09-10T00:00:00.000Z',
@@ -53,17 +63,9 @@ export class UpdateBoardDto {
   startDate?: string;
 
   @ApiPropertyOptional({
-    example: '2026-10-10T00:00:00.000Z',
+    example: '2026-09-20T00:00:00.000Z',
   })
   @IsDateString()
   @IsOptional()
   finishDate?: string;
-}
-
-export class InviteBoardMemberDto {
-  @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
-  })
-  @IsUUID()
-  userId!: string;
 }
