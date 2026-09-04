@@ -1,7 +1,11 @@
-
 'use client';
 
+import { sendGetRequest } from '@/apis/getRequest';
 import { useEffect, useState } from 'react';
+import CreateUser from '../../../components/users/CreateUser';
+import ViewUser from '../../../components/users/ViewUser';
+import EditUser from '../../../components/users/EditUser';
+import DeleteUser from '../../../components/users/DeleteUser';
 
 type User = {
   id: string;
@@ -16,31 +20,41 @@ export default function UsersPage() {
 
   useEffect(() => {
     async function fetchUsers() {
-      const authData = localStorage.getItem('webBriksAuth');
+      try {
+        const data = await sendGetRequest(
+          '/users',
+          'UsersComponent',
+          {
+            requiredAuth: true,
+          },
+        );
 
-      if (!authData) return;
-
-      const { accessToken } = JSON.parse(authData);
-
-      const response = await fetch('http://localhost:3000/users', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      const data = await response.json();
-
-      setUsers(data);
+        console.log('Fetched users:', data);
+        setUsers(data);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     fetchUsers();
   }, []);
 
+
+  const handleUserDeleted = (userId: string) => {
+  setUsers((currentUsers) =>
+    currentUsers.filter((user) => user.id !== userId),
+  );
+};
+
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">
-        Users
-      </h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Users
+        </h1>
+
+       <CreateUser />
+      </div>
 
       <div className="rounded-lg border bg-white">
         {users.map((user) => (
@@ -49,7 +63,7 @@ export default function UsersPage() {
             className="flex items-center justify-between border-b p-4 last:border-b-0"
           >
             <div>
-              <h2 className="font-semibold">
+              <h2 className="font-semibold text-gray-900">
                 {user.name}
               </h2>
 
@@ -58,9 +72,21 @@ export default function UsersPage() {
               </p>
             </div>
 
-            <span className="rounded bg-gray-100 px-3 py-1 text-sm">
-              {user.role}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`rounded px-3 py-1 text-sm font-semibold ${
+                    user.role === 'MEMBER'
+                    ? 'bg-white text-gray-700 border border-gray-300'
+                    : 'bg-gray-700 text-white'
+                }`}>
+                {user.role}
+              </span>
+
+              <ViewUser userId={user.id} />
+              <EditUser userId={user.id} />
+              <DeleteUser userId={user.id}
+  onDeleted={handleUserDeleted} />
+            </div>
           </div>
         ))}
       </div>

@@ -19,5 +19,11 @@ export function setupSwagger(app: INestApplication) {
 
   const document = SwaggerModule.createDocument(app, config);
 
+  document.security = [
+    {
+      'access-token': [],
+    },
+  ];
+
   SwaggerModule.setup('api/v1', app, document);
 }

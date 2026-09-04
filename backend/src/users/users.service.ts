@@ -81,6 +81,36 @@ export class UsersService {
         image: true,
         createdAt: true,
         updatedAt: true,
+
+        boards: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            creatorUserId: true,
+            startDate: true,
+            finishDate: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+
+        boardMembers: {
+          select: {
+            board: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                creatorUserId: true,
+                startDate: true,
+                finishDate: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -88,7 +118,26 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    const boards = [
+      ...user.boards,
+      ...user.boardMembers
+        .filter(
+          (member) =>
+            !user.boards.some((board) => board.id === member.board.id),
+        )
+        .map((member) => member.board),
+    ];
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      boards,
+    };
   }
 
   async updateUser(id: string, dto: UpdateUserDto) {

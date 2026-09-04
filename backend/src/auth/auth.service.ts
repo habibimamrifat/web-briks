@@ -34,7 +34,6 @@ export class AuthService {
 
     const payload = {
       userId: user.id,
-      email: user.email,
       role: user.role,
     };
 
@@ -52,7 +51,17 @@ export class AuthService {
     try {
       const payload = await this.jwtService.verifyRefreshToken(refreshToken);
 
-      const newAccessToken = await this.jwtService.generateAuthToken(payload);
+      // console.log('========>>>>', payload);
+
+      const userPayload = {
+        userId: payload.userId,
+        role: payload.role,
+      };
+
+      console.log('userPayload:', userPayload);
+
+      const newAccessToken =
+        await this.jwtService.generateAuthToken(userPayload);
 
       return {
         accessToken: newAccessToken,
@@ -143,7 +152,7 @@ export class AuthService {
     });
   }
 
-  async logout(userId: string) {
+  logout(userId: string) {
     // Token invalidation will be implemented if we store refresh tokens.
     return {
       message: 'Logged out successfully',

@@ -4,7 +4,6 @@ import { StringValue } from 'ms';
 import { AppJwtService } from './jwt.service.js';
 import { AUTH_JWT, REFRESH_JWT } from './jwt.constent.js';
 
-
 @Global()
 @Module({
   providers: [
@@ -16,8 +15,7 @@ import { AUTH_JWT, REFRESH_JWT } from './jwt.constent.js';
           signOptions: {
             audience: process.env.JWT_AUTH_AUDIENCE,
             issuer: process.env.JWT_AUTH_ISSUER,
-            expiresIn: (process.env.JWT_AUTH_EXPIRES_IN ??
-              '15m') as StringValue,
+            expiresIn: process.env.JWT_AUTH_EXPIRES_IN as StringValue,
           },
         }),
     },
@@ -29,8 +27,7 @@ import { AUTH_JWT, REFRESH_JWT } from './jwt.constent.js';
           signOptions: {
             audience: process.env.JWT_REFRESH_AUDIENCE,
             issuer: process.env.JWT_REFRESH_ISSUER,
-            expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN ??
-              '365d') as StringValue,
+            expiresIn: process.env.JWT_REFRESH_EXPIRES_IN as StringValue,
           },
         }),
     },
