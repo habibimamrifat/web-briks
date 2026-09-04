@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { sendGetRequest } from '@/apis/getRequest';
-import { useEffect, useState } from 'react';
+import { sendGetRequest } from "@/apis/getRequest";
+import { useEffect, useState } from "react";
 
-import CreateBoard from '@/components/boards/CreateBoard';
-import ViewBoard from '@/components/boards/ViewBoard';
-import EditBoard from '@/components/boards/EditBoard';
-import DeleteBoard from '@/components/boards/DeleteBoard';
+import CreateBoard from "@/components/boards/CreateBoard";
+import ViewBoard from "@/components/boards/ViewBoard";
+import EditBoard from "@/components/boards/EditBoard";
+import DeleteBoard from "@/components/boards/DeleteBoard";
 
 type Board = {
   id: string;
@@ -26,13 +26,9 @@ export default function BoardsPage() {
   useEffect(() => {
     async function fetchBoards() {
       try {
-        const data = await sendGetRequest(
-          '/boards',
-          'BoardsPage',
-          {
-            requiredAuth: true,
-          },
-        );
+        const data = await sendGetRequest("/boards", "BoardsPage", {
+          requiredAuth: true,
+        });
 
         setBoards(data);
       } catch (error) {
@@ -47,9 +43,7 @@ export default function BoardsPage() {
 
   const handleBoardDeleted = (boardId: string) => {
     setBoards((currentBoards) =>
-      currentBoards.filter(
-        (board) => board.id !== boardId,
-      ),
+      currentBoards.filter((board) => board.id !== boardId),
     );
   };
 
@@ -66,13 +60,9 @@ export default function BoardsPage() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Boards
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">Boards</h1>
 
-            <p className="mt-1 text-gray-600">
-              Manage your boards
-            </p>
+            <p className="mt-1 text-gray-600">Manage your boards</p>
           </div>
 
           <CreateBoard />
@@ -80,9 +70,7 @@ export default function BoardsPage() {
 
         {boards.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
-            <p className="text-gray-600">
-              No boards found.
-            </p>
+            <p className="text-gray-600">No boards found.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -96,8 +84,7 @@ export default function BoardsPage() {
                 </h2>
 
                 <p className="mt-2 min-h-10 text-sm text-gray-600">
-                  {board.description ||
-                    'No description provided.'}
+                  {board.description || "No description provided."}
                 </p>
 
                 <div className="mt-5 border-t border-gray-100 pt-4">
@@ -109,10 +96,8 @@ export default function BoardsPage() {
 
                       <p className="mt-1 text-sm text-gray-600">
                         {board.startDate
-                          ? new Date(
-                              board.startDate,
-                            ).toLocaleDateString()
-                          : 'Not set'}
+                          ? new Date(board.startDate).toLocaleDateString()
+                          : "Not set"}
                       </p>
                     </div>
 
@@ -123,10 +108,8 @@ export default function BoardsPage() {
 
                       <p className="mt-1 text-sm text-gray-600">
                         {board.finishDate
-                          ? new Date(
-                              board.finishDate,
-                            ).toLocaleDateString()
-                          : 'Not set'}
+                          ? new Date(board.finishDate).toLocaleDateString()
+                          : "Not set"}
                       </p>
                     </div>
                   </div>

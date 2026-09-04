@@ -69,6 +69,11 @@ export class BoardsController {
     @Param('id') boardId: string,
     @Body() dto: InviteBoardMemberDto,
   ) {
-    return this.boardsService.inviteMember(boardId, user.userId, dto.userId);
+    return this.boardsService.inviteMember(
+      boardId,
+      user.userId,
+      dto.addMemberIds,
+      dto.removeMemberIds,
+    );
   }
 }

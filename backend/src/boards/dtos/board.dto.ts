@@ -62,8 +62,14 @@ export class UpdateBoardDto {
 
 export class InviteBoardMemberDto {
   @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
   })
-  @IsUUID()
-  userId!: string;
+  @IsUUID('4', { each: true })
+  addMemberIds!: string[];
+
+  @ApiProperty({
+    example: ['650e8400-e29b-41d4-a716-446655440001'],
+  })
+  @IsUUID('4', { each: true })
+  removeMemberIds!: string[];
 }

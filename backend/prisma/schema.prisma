@@ -73,6 +73,7 @@ model WorkflowState {
   userId   String
   boardId  String
   position Int    @default(0)
+  description String?
 
   startDate  DateTime?
   finishDate DateTime?

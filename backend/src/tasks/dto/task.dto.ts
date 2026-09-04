@@ -59,30 +59,46 @@ export class CreateTaskDto {
 }
 
 export class UpdateTaskDto {
-  @ApiPropertyOptional({
-    example: 'Implement authentication',
-  })
+  @ApiPropertyOptional({ example: 'Implement authentication' })
   @IsString()
   @IsOptional()
   title?: string;
 
-  @ApiPropertyOptional({
-    example: 'Updated task description',
-  })
+  @ApiPropertyOptional({ example: 'Updated task description' })
   @IsString()
   @IsOptional()
   description?: string;
 
   @ApiPropertyOptional({
-    example: '2026-09-06T00:00:00.000Z',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
+  @IsUUID()
+  @IsOptional()
+  workflowStateId?: string;
+
+  @ApiPropertyOptional({
+    example: 2,
+    description: 'Task position inside the workflow state',
+  })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  priorityIndex?: number;
+
+  @ApiPropertyOptional({
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+    description: 'User IDs to assign to the task',
+  })
+  @IsUUID('4', { each: true })
+  @IsOptional()
+  assigneeIds?: string[];
+
+  @ApiPropertyOptional({ example: '2026-09-06T00:00:00.000Z' })
   @IsDateString()
   @IsOptional()
   startDate?: string;
 
-  @ApiPropertyOptional({
-    example: '2026-09-20T00:00:00.000Z',
-  })
+  @ApiPropertyOptional({ example: '2026-09-20T00:00:00.000Z' })
   @IsDateString()
   @IsOptional()
   finishDate?: string;

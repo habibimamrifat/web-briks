@@ -91,12 +91,39 @@ export class BoardsService {
                 name: true,
                 email: true,
                 image: true,
+                role: true,
               },
             },
           },
         },
-        states: true,
-        tasks: true,
+
+        states: {
+          orderBy: {
+            position: 'asc',
+          },
+        },
+
+        tasks: {
+          orderBy: {
+            priorityIndex: 'asc',
+          },
+
+          include: {
+            assignees: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
+                    role: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -162,7 +189,12 @@ export class BoardsService {
     };
   }
 
-  async inviteMember(boardId: string, creatorUserId: string, userId: string) {
+  async inviteMember(
+    boardId: string,
+    creatorUserId: string,
+    addMemberIds: string[],
+    removeMemberIds: string[],
+  ) {
     const board = await this.prisma.board.findFirst({
       where: {
         id: boardId,
@@ -171,56 +203,77 @@ export class BoardsService {
     });
 
     if (!board) {
-      throw new ForbiddenException('Only the board creator can invite members');
+      throw new ForbiddenException('Only the board creator can manage members');
     }
 
-    const user = await this.prisma.user.findFirst({
+    // Creator cannot be removed or added.
+    if (
+      addMemberIds.includes(board.creatorUserId) ||
+      removeMemberIds.includes(board.creatorUserId)
+    ) {
+      throw new ConflictException('Board creator cannot be added or removed');
+    }
+
+    const allUserIds = [...new Set([...addMemberIds, ...removeMemberIds])];
+
+    const users = await this.prisma.user.findMany({
       where: {
-        id: userId,
+        id: {
+          in: allUserIds,
+        },
         deletedAt: null,
       },
+      select: {
+        id: true,
+      },
     });
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+    if (users.length !== allUserIds.length) {
+      throw new NotFoundException('One or more users were not found');
     }
 
-    // Creator is already part of the board.
-    if (board.creatorUserId === userId) {
-      throw new ConflictException(
-        'Board creator is already a member of this board',
-      );
-    }
+    const result = await this.prisma.$transaction(async (tx) => {
+      if (removeMemberIds.length > 0) {
+        await tx.boardMember.deleteMany({
+          where: {
+            boardId,
+            userId: {
+              in: removeMemberIds,
+            },
+          },
+        });
+      }
 
-    const existingMember = await this.prisma.boardMember.findUnique({
-      where: {
-        boardId_userId: {
+      if (addMemberIds.length > 0) {
+        await tx.boardMember.createMany({
+          data: addMemberIds.map((userId) => ({
+            boardId,
+            userId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      const members = await tx.boardMember.findMany({
+        where: {
           boardId,
-          userId,
         },
-      },
-    });
-
-    if (existingMember) {
-      throw new ConflictException('User is already a member of this board');
-    }
-
-    return this.prisma.boardMember.create({
-      data: {
-        boardId,
-        userId,
-      },
-
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              role: true,
+            },
           },
         },
-      },
+      });
+
+      return members;
     });
+
+    return result;
   }
 }

@@ -81,9 +81,46 @@ export class TasksService {
   }
 
   async findOne(id: string, userId: string) {
-    const task = await this.prisma.task.findUnique({
+    const task = await this.prisma.task.findFirst({
       where: {
         id,
+        board: {
+          OR: [
+            {
+              creatorUserId: userId,
+            },
+            {
+              members: {
+                some: {
+                  userId,
+                },
+              },
+            },
+          ],
+        },
+      },
+
+      include: {
+        workflowState: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+
+        assignees: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+                role: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -91,27 +128,66 @@ export class TasksService {
       throw new NotFoundException('Task not found');
     }
 
-    await this.checkBoardAccess(task.boardId, userId);
-
     return task;
   }
 
   async update(id: string, userId: string, dto: UpdateTaskDto) {
     const task = await this.findOne(id, userId);
 
-    return this.prisma.task.update({
-      where: {
-        id: task.id,
-      },
-      data: {
-        title: dto.title,
-        description: dto.description,
+    const updatedTask = await this.prisma.$transaction(async (tx) => {
+      // Update normal task fields
+      const updatedTask = await tx.task.update({
+        where: {
+          id: task.id,
+        },
 
-        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+        data: {
+          title: dto.title,
+          description: dto.description,
 
-        finishDate: dto.finishDate ? new Date(dto.finishDate) : undefined,
-      },
+          workflowStateId: dto.workflowStateId,
+
+          priorityIndex: dto.priorityIndex,
+
+          startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+
+          finishDate: dto.finishDate ? new Date(dto.finishDate) : undefined,
+        },
+      });
+
+      // Toggle assigned members
+      if (dto.assigneeIds) {
+        for (const memberId of dto.assigneeIds) {
+          const existingAssignment = await tx.taskAssignee.findUnique({
+            where: {
+              taskId_userId: {
+                taskId: task.id,
+                userId: memberId,
+              },
+            },
+          });
+
+          if (existingAssignment) {
+            await tx.taskAssignee.delete({
+              where: {
+                id: existingAssignment.id,
+              },
+            });
+          } else {
+            await tx.taskAssignee.create({
+              data: {
+                taskId: task.id,
+                userId: memberId,
+              },
+            });
+          }
+        }
+      }
+
+      return updatedTask;
     });
+
+    return updatedTask;
   }
 
   async move(id: string, userId: string, dto: MoveTaskDto) {
