@@ -6,12 +6,15 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto.js';
 import { Roles } from '../decorators/role.decorator.js';
 import { CurrentUser } from '../decorators/currentUser.decorator.js';
 import type { jwtUserPayload } from '../types/jwtUser.type.js';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UsersController {
@@ -19,8 +22,9 @@ export class UsersController {
 
   @Roles('ADMIN')
   @Post()
-  createUser(@Body() dto: CreateUserDto) {
-    return this.usersService.createUser(dto);
+  @UseInterceptors(FileInterceptor('image'))
+  createUser(@Body() dto: CreateUserDto, @UploadedFile() file?: any) {
+    return this.usersService.createUser(dto, file);
   }
 
   @Roles('ALL')

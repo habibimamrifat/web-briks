@@ -6,15 +6,19 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto.js';
 import { PasswordHasher } from '../helpers/bcrypt/passwordHash.abstract.js';
+import { EmailService } from '../mail/mail.service.js';
+import { FileUploadService } from '../helpers/fileUpload/file-upload.service.js';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly passwordHasher: PasswordHasher,
+    private readonly emailService: EmailService,
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
-  async createUser(dto: CreateUserDto) {
+  async createUser(dto: CreateUserDto, file?: any) {
     const existingUser = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -25,15 +29,21 @@ export class UsersService {
       throw new ConflictException('Email already exists');
     }
 
+    let imageUrl: string | undefined;
+
+    if (file) {
+      imageUrl = await this.fileUploadService.uploadFile(file);
+    }
+
     const hashedPassword = await this.passwordHasher.hashPassword(dto.password);
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         name: dto.name,
         email: dto.email,
         password: hashedPassword,
         role: dto.role,
-        image: dto.image,
+        image: imageUrl,
       },
       select: {
         id: true,
@@ -45,6 +55,30 @@ export class UsersService {
         updatedAt: true,
       },
     });
+
+    try {
+      await this.emailService.sendEmail(
+        user.email,
+        'Your Web Briks Account',
+        `Hello ${user.name},
+
+        Your Web Briks account has been created successfully.
+
+        Email: ${user.email}
+        Password: ${dto.password}
+
+        You can now log in to your account.
+
+        Please change your password after logging in.
+
+        Regards,
+        Web Briks`,
+      );
+    } catch (error) {
+      console.error('Failed to send user creation email:', error);
+    }
+
+    return user;
   }
 
   async getUsers() {

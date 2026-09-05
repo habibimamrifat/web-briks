@@ -7,11 +7,12 @@ import { UsersModule } from './users/users.module.js';
 import { BoardsModule } from './boards/boards.module.js';
 import { WorkflowStatesModule } from './workflow-states/workflow-states.module.js';
 import { TasksModule } from './tasks/tasks.module.js';
-import { MailModule } from './mail/mail.module.js';
+import { EmailModule } from './mail/mail.module.js';
 import { BcryptModule } from './helpers/bcrypt/bcrypt.module.js';
 import { AppService } from './app.service.js';
 import { JwtHelperModule } from './helpers/jwt/jwt.module.js';
 import { AuthGuard } from './guards/auth.guard.js';
+import { FileUploadModule } from './helpers/fileUpload/file-upload.module.js';
 
 @Module({
   imports: [
@@ -23,8 +24,9 @@ import { AuthGuard } from './guards/auth.guard.js';
     BoardsModule,
     WorkflowStatesModule,
     TasksModule,
-    MailModule,
+    EmailModule,
     JwtHelperModule,
+    FileUploadModule
   ],
   controllers: [AppController],
   providers: [AppService, AuthGuard],

@@ -53,8 +53,8 @@ export class AuthController {
     return this.authService.getMe(user.userId);
   }
 
-  @Post('logout')
-  logout(@CurrentUser() user: jwtUserPayload) {
-    return this.authService.logout(user.userId);
-  }
+  // @Post('logout')
+  // logout(@CurrentUser() user: jwtUserPayload) {
+  //   return this.authService.logout(user.userId);
+  // }
 }

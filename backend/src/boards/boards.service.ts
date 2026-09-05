@@ -6,10 +6,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateBoardDto, UpdateBoardDto } from './dtos/board.dto.js';
+import { EmailService } from '../mail/mail.service.js';
 
 @Injectable()
 export class BoardsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async createBoard(userId: string, dto: CreateBoardDto) {
     return await this.prisma.board.create({
@@ -225,6 +229,8 @@ export class BoardsService {
       },
       select: {
         id: true,
+        name: true,
+        email: true,
       },
     });
 
@@ -273,6 +279,31 @@ export class BoardsService {
 
       return members;
     });
+
+    // Send email to every newly added member.
+    const addedMembers = users.filter((user) => addMemberIds.includes(user.id));
+
+    for (const member of addedMembers) {
+      try {
+        await this.emailService.sendEmail(
+          member.email,
+          `You have been added to ${board.name}`,
+          `Hello ${member.name},
+
+          You have been added as a member of the board "${board.name}".
+
+          You can now access this board from your Web Briks account.
+
+          Regards,
+          Web Briks`,
+        );
+      } catch (error) {
+        console.error(
+          `Failed to send board invitation email to ${member.email}:`,
+          error,
+        );
+      }
+    }
 
     return result;
   }

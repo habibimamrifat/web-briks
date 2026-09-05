@@ -1,8 +1,9 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { StringValue } from 'ms';
+
 import { AppJwtService } from './jwt.service.js';
-import { AUTH_JWT, REFRESH_JWT } from './jwt.constent.js';
+import { AUTH_JWT, REFRESH_JWT, RESET_JWT } from './jwt.constent.js';
 
 @Global()
 @Module({
@@ -19,6 +20,7 @@ import { AUTH_JWT, REFRESH_JWT } from './jwt.constent.js';
           },
         }),
     },
+
     {
       provide: REFRESH_JWT,
       useFactory: () =>
@@ -31,8 +33,21 @@ import { AUTH_JWT, REFRESH_JWT } from './jwt.constent.js';
           },
         }),
     },
+
+    {
+      provide: RESET_JWT,
+      useFactory: () =>
+        new JwtService({
+          secret: process.env.JWT_RESET_SECRET,
+          signOptions: {
+            expiresIn: '15m',
+          },
+        }),
+    },
+
     AppJwtService,
   ],
+
   exports: [AppJwtService],
 })
 export class JwtHelperModule {}
