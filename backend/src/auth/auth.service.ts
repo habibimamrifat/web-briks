@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AppJwtService } from '../helpers/jwt/jwt.service.js';
 import { LoginDto, ResetPasswordDto, SetPasswordDto } from './dto/auth.dto.js';
@@ -174,9 +178,12 @@ Web Briks`,
   }
 
   async getMe(userId: string) {
-    return this.prisma.user.findUnique({
+    console.log('me is being called', userId);
+
+    const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -186,8 +193,148 @@ Web Briks`,
         image: true,
         createdAt: true,
         updatedAt: true,
+
+        boards: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            creatorUserId: true,
+            startDate: true,
+            finishDate: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+
+        boardMembers: {
+          select: {
+            id: true,
+            joinedAt: true,
+            board: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                creatorUserId: true,
+                startDate: true,
+                finishDate: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+
+        workflowStates: {
+          orderBy: {
+            position: 'asc',
+          },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            position: true,
+            boardId: true,
+            startDate: true,
+            finishDate: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+
+        tasks: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            boardId: true,
+            workflowStateId: true,
+            priorityIndex: true,
+            startDate: true,
+            finishDate: true,
+            createdAt: true,
+            updatedAt: true,
+
+            board: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+
+            workflowState: {
+              select: {
+                id: true,
+                name: true,
+                position: true,
+              },
+            },
+
+            assignees: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        taskAssignees: {
+          select: {
+            id: true,
+            taskId: true,
+            task: {
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                boardId: true,
+                workflowStateId: true,
+                priorityIndex: true,
+                startDate: true,
+                finishDate: true,
+                createdAt: true,
+                updatedAt: true,
+
+                board: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+
+                workflowState: {
+                  select: {
+                    id: true,
+                    name: true,
+                    position: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   // logout(userId: string) {

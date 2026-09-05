@@ -35,6 +35,8 @@ export class UsersService {
       imageUrl = await this.fileUploadService.uploadFile(file);
     }
 
+    console.log('the img url is =========>>>>>>', imageUrl);
+
     const hashedPassword = await this.passwordHasher.hashPassword(dto.password);
 
     const user = await this.prisma.user.create({
@@ -174,7 +176,7 @@ export class UsersService {
     };
   }
 
-  async updateUser(id: string, dto: UpdateUserDto) {
+  async updateUser(id: string, dto: UpdateUserDto, file?: any) {
     await this.getUserById(id);
 
     if (dto.email) {
@@ -193,15 +195,23 @@ export class UsersService {
       }
     }
 
-    return this.prisma.user.update({
+    let imageUrl: string | undefined;
+
+    if (file) {
+      imageUrl = await this.fileUploadService.uploadFile(file);
+    }
+
+    const user = await this.prisma.user.update({
       where: {
         id,
       },
       data: {
         name: dto.name,
         email: dto.email,
-        image: dto.image,
         role: dto.role,
+        ...(imageUrl && {
+          image: imageUrl,
+        }),
       },
       select: {
         id: true,
@@ -213,6 +223,8 @@ export class UsersService {
         updatedAt: true,
       },
     });
+
+    return user;
   }
 
   async deleteUser(id: string) {
@@ -230,5 +242,59 @@ export class UsersService {
     return {
       message: 'User deleted successfully',
     };
+  }
+
+  async updateMe(id: string, dto: UpdateUserDto, file?: any) {
+    console.log('i am being called update me');
+    await this.getUserById(id);
+
+    if (dto.email) {
+      const existingUser = await this.prisma.user.findFirst({
+        where: {
+          email: dto.email,
+          id: {
+            not: id,
+          },
+          deletedAt: null,
+        },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    let imageUrl: string | undefined;
+
+    if (file) {
+      imageUrl = await this.fileUploadService.uploadFile(file);
+    }
+
+    const user = await this.prisma.user.update({
+      where: {
+        id,
+      },
+
+      data: {
+        name: dto.name,
+        email: dto.email,
+
+        ...(imageUrl && {
+          image: imageUrl,
+        }),
+      },
+
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return user;
   }
 }

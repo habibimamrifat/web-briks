@@ -23,7 +23,13 @@ export class UsersController {
   @Roles('ADMIN')
   @Post()
   @UseInterceptors(FileInterceptor('image'))
-  createUser(@Body() dto: CreateUserDto, @UploadedFile() file?: any) {
+  createUser(
+    @CurrentUser() user: jwtUserPayload,
+    @Body() dto: CreateUserDto,
+    @UploadedFile() file?: any,
+  ) {
+    console.log('FILE RECEIVED:', file);
+
     return this.usersService.createUser(dto, file);
   }
 
@@ -47,14 +53,24 @@ export class UsersController {
 
   @Roles('ALL')
   @Patch('me')
-  updateMe(@CurrentUser() user: jwtUserPayload, @Body() dto: UpdateUserDto) {
-    return this.usersService.updateUser(user.userId, dto);
+  @UseInterceptors(FileInterceptor('image'))
+  updateMe(
+    @CurrentUser() user: jwtUserPayload,
+    @Body() dto: UpdateUserDto,
+    @UploadedFile() file?: any,
+  ) {
+    return this.usersService.updateMe(user.userId, dto, file);
   }
 
   @Roles('ADMIN')
   @Patch(':id')
-  updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.usersService.updateUser(id, dto);
+  @UseInterceptors(FileInterceptor('image'))
+  updateUser(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @UploadedFile() file?: any,
+  ) {
+    return this.usersService.updateUser(id, dto, file);
   }
 
   @Roles('ADMIN')

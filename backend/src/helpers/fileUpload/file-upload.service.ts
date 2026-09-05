@@ -4,6 +4,14 @@ import { v2 as cloudinary } from 'cloudinary';
 @Injectable()
 export class FileUploadService {
   constructor() {
+    console.log('CLOUDINARY ENV CHECK:');
+    console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
+    console.log('CLOUDINARY_API_KEY exists:', !!process.env.CLOUDINARY_API_KEY);
+    console.log(
+      'CLOUDINARY_API_SECRET exists:',
+      !!process.env.CLOUDINARY_API_SECRET,
+    );
+
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
@@ -12,6 +20,8 @@ export class FileUploadService {
   }
 
   async uploadFile(file: any): Promise<string> {
+    console.log('Uploading file to Cloudinary...');
+
     try {
       const result = await new Promise<any>((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(

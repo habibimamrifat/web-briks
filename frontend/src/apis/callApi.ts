@@ -20,9 +20,13 @@ export async function callApis(
   const { method, body, requiredAuth = false } = options;
 
   try {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
+    const headers: HeadersInit = {};
+
+    const isFormData = body instanceof FormData;
+
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    }
 
     if (requiredAuth) {
       const accessToken = getAuthToken("access");
@@ -37,7 +41,7 @@ export async function callApis(
     const response = await fetch(`${API_URL}${url}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     });
 
     if (response.status === 401 && requiredAuth) {

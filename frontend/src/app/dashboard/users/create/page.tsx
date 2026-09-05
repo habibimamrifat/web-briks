@@ -41,29 +41,44 @@ export default function CreateUserPage() {
   ) => {
     e.preventDefault();
 
+    console.log("Submitting form with data:", {
+      name,
+      email,
+      password,
+      image,
+    });
+
     try {
       setSubmitting(true);
+
+      const formData = new FormData();
+
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+
+      if (image) {
+        formData.append("image", image);
+      }
+
+      console.log(
+        "IMAGE FROM FORMDATA:",
+        formData.get("image"),
+      );
 
       await callApis(
         "/users",
         "CreateUserPage",
         {
           method: "POST",
-          body: {
-            name,
-            email,
-            password,
-            image:
-              image?.name || undefined,
-          },
+          body: formData,
           requiredAuth: true,
         },
       );
 
       setResult({
         type: "success",
-        message:
-          "User created successfully.",
+        message: "User created successfully.",
       });
     } catch (error) {
       const message =
@@ -243,9 +258,7 @@ export default function CreateUserPage() {
             <div className="mt-6 flex justify-end">
               <button
                 type="button"
-                onClick={
-                  handleResultClose
-                }
+                onClick={handleResultClose}
                 className={`rounded-lg px-5 py-2 text-sm font-semibold text-white ${
                   result.type === "success"
                     ? "bg-gray-900 hover:bg-gray-800"

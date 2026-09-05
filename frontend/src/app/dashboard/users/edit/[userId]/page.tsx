@@ -22,9 +22,11 @@ export default function EditUserPage() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<'ADMIN' | 'MEMBER'>('MEMBER');
+  const [role, setRole] =
+    useState<'ADMIN' | 'MEMBER'>('MEMBER');
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] =
+    useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,16 +80,25 @@ export default function EditUserPage() {
     try {
       setSaving(true);
 
-      await callApis(`/users/${userId}`, 'EditUserPage', {
-        method: 'PATCH',
-        body: {
-          name,
-          email,
-          role,
-          image: image?.name || undefined,
+      const formData = new FormData();
+
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('role', role);
+
+      if (image) {
+        formData.append('image', image);
+      }
+
+      await callApis(
+        `/users/${userId}`,
+        'EditUserPage',
+        {
+          method: 'PATCH',
+          body: formData,
+          requiredAuth: true,
         },
-        requiredAuth: true,
-      });
+      );
 
       router.push('/dashboard/users');
     } catch (error) {
@@ -100,7 +111,9 @@ export default function EditUserPage() {
   if (loading) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-        <p className="text-gray-700">Loading user...</p>
+        <p className="text-gray-700">
+          Loading user...
+        </p>
       </div>
     );
   }
@@ -118,7 +131,10 @@ export default function EditUserPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
           <div>
             <label
               htmlFor="name"
@@ -131,7 +147,9 @@ export default function EditUserPage() {
               id="name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) =>
+                setName(e.target.value)
+              }
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-600 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
             />
@@ -149,7 +167,9 @@ export default function EditUserPage() {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-600 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
             />
@@ -167,12 +187,21 @@ export default function EditUserPage() {
               id="role"
               value={role}
               onChange={(e) =>
-                setRole(e.target.value as 'ADMIN' | 'MEMBER')
+                setRole(
+                  e.target.value as
+                    | 'ADMIN'
+                    | 'MEMBER',
+                )
               }
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-600 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
             >
-              <option value="MEMBER">MEMBER</option>
-              <option value="ADMIN">ADMIN</option>
+              <option value="MEMBER">
+                MEMBER
+              </option>
+
+              <option value="ADMIN">
+                ADMIN
+              </option>
             </select>
           </div>
 
@@ -182,6 +211,7 @@ export default function EditUserPage() {
               className="mb-2 block text-sm font-semibold text-gray-900"
             >
               Profile Image
+
               <span className="ml-1 font-normal text-gray-500">
                 (optional)
               </span>
@@ -222,7 +252,9 @@ export default function EditUserPage() {
             disabled={saving}
             className="w-full rounded-lg bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? 'Updating...' : 'Update User'}
+            {saving
+              ? 'Updating...'
+              : 'Update User'}
           </button>
         </form>
       </div>
