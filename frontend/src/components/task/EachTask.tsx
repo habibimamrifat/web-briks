@@ -1,5 +1,8 @@
 "use client";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 import type { Task } from "@/types/allTypes";
 
 import ViewTask from "../task/ViewTask";
@@ -15,8 +18,35 @@ export default function EachTask({
   task,
   onDelete,
 }: EachTaskProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: task.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1000 : "auto",
+  };
+
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition ${
+        isDragging
+          ? "relative opacity-40 blur-[1px]"
+          : ""
+      }`}
+    >
       <h3 className="font-semibold text-gray-900">
         {task.title}
       </h3>

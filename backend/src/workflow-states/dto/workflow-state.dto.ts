@@ -1,8 +1,8 @@
 import {
   IsDateString,
+  IsInt,
   IsOptional,
   IsString,
-  IsInt,
   Min,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -13,6 +13,13 @@ export class CreateWorkflowStateDto {
   })
   @IsString()
   name!: string;
+
+  @ApiPropertyOptional({
+    example: 'Tasks currently being worked on',
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
 
   @ApiPropertyOptional({
     example: 1,
@@ -45,6 +52,13 @@ export class UpdateWorkflowStateDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @ApiPropertyOptional({
+    example: 'All completed tasks',
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
 
   @ApiPropertyOptional({
     example: 2,

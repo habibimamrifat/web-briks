@@ -85,22 +85,56 @@ export class WorkflowStatesService {
   }
 
   async update(id: string, userId: string, dto: UpdateWorkflowStateDto) {
-    const state = await this.findOne(id, userId);
-
-    return this.prisma.workflowState.update({
+    const state = await this.prisma.workflowState.findFirst({
       where: {
-        id: state.id,
-      },
-      data: {
-        name: dto.name,
-
-        position: dto.position,
-
-        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-
-        finishDate: dto.finishDate ? new Date(dto.finishDate) : undefined,
+        id,
+        board: {
+          OR: [
+            { creatorUserId: userId },
+            {
+              members: {
+                some: {
+                  userId,
+                },
+              },
+            },
+          ],
+        },
       },
     });
+
+    if (!state) {
+      throw new NotFoundException('Workflow state not found');
+    }
+
+    const updatedState = await this.prisma.workflowState.update({
+      where: {
+        id,
+      },
+      data: {
+        ...(dto.name !== undefined && {
+          name: dto.name,
+        }),
+
+        ...(dto.description !== undefined && {
+          description: dto.description,
+        }),
+
+        ...(dto.position !== undefined && {
+          position: dto.position,
+        }),
+
+        ...(dto.startDate !== undefined && {
+          startDate: new Date(dto.startDate),
+        }),
+
+        ...(dto.finishDate !== undefined && {
+          finishDate: new Date(dto.finishDate),
+        }),
+      },
+    });
+
+    return updatedState;
   }
 
   async remove(id: string, userId: string) {
