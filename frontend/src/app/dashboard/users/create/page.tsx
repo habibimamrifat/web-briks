@@ -1,18 +1,27 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { callApis } from '@/apis/callApi';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import Image from "next/image";
+import { callApis } from "@/apis/callApi";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function CreateUserPage() {
   const router = useRouter();
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] =
+    useState<string | null>(null);
+
+  const [result, setResult] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const [submitting, setSubmitting] =
+    useState(false);
 
   const handleImageChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -33,21 +42,51 @@ export default function CreateUserPage() {
     e.preventDefault();
 
     try {
-      await callApis('/users', 'CreateUserPage', {
-        method: 'POST',
-        body: {
-          name,
-          email,
-          password,
-          image: image?.name || undefined,
-        },
-        requiredAuth: true,
-      });
+      setSubmitting(true);
 
-      router.push('/dashboard/users');
+      await callApis(
+        "/users",
+        "CreateUserPage",
+        {
+          method: "POST",
+          body: {
+            name,
+            email,
+            password,
+            image:
+              image?.name || undefined,
+          },
+          requiredAuth: true,
+        },
+      );
+
+      setResult({
+        type: "success",
+        message:
+          "User created successfully.",
+      });
     } catch (error) {
-      console.error(error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to create user.";
+
+      setResult({
+        type: "error",
+        message,
+      });
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const handleResultClose = () => {
+    if (result?.type === "success") {
+      router.push("/dashboard/users");
+      return;
+    }
+
+    setResult(null);
   };
 
   return (
@@ -63,7 +102,10 @@ export default function CreateUserPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
           <div>
             <label
               htmlFor="name"
@@ -76,7 +118,9 @@ export default function CreateUserPage() {
               id="name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) =>
+                setName(e.target.value)
+              }
               placeholder="John Doe"
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
@@ -95,7 +139,9 @@ export default function CreateUserPage() {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               placeholder="john@example.com"
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
@@ -108,8 +154,11 @@ export default function CreateUserPage() {
               className="mb-2 block text-sm font-semibold text-gray-900"
             >
               Password
+
               <h6 className="ml-1 text-sm font-normal text-gray-500">
-                (This password will be changed by the user after first login)
+                (This password will be
+                changed by the user after
+                first login)
               </h6>
             </label>
 
@@ -117,7 +166,9 @@ export default function CreateUserPage() {
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
               placeholder="••••••••"
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
@@ -130,6 +181,7 @@ export default function CreateUserPage() {
               className="mb-2 block text-sm font-semibold text-gray-900"
             >
               Profile Image
+
               <span className="ml-1 font-normal text-gray-500">
                 (optional)
               </span>
@@ -164,12 +216,48 @@ export default function CreateUserPage() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-800"
+            disabled={submitting}
+            className="w-full rounded-lg bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Create User
+            {submitting
+              ? "Creating..."
+              : "Create User"}
           </button>
         </form>
       </div>
+
+      {/* Result Modal */}
+      {result && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-gray-900">
+              {result.type === "success"
+                ? "Success"
+                : "Failed"}
+            </h2>
+
+            <p className="mt-3 text-gray-600">
+              {result.message}
+            </p>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={
+                  handleResultClose
+                }
+                className={`rounded-lg px-5 py-2 text-sm font-semibold text-white ${
+                  result.type === "success"
+                    ? "bg-gray-900 hover:bg-gray-800"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
