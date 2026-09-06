@@ -13,6 +13,7 @@ import { AppService } from './app.service.js';
 import { JwtHelperModule } from './helpers/jwt/jwt.module.js';
 import { AuthGuard } from './guards/auth.guard.js';
 import { FileUploadModule } from './helpers/fileUpload/file-upload.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { FileUploadModule } from './helpers/fileUpload/file-upload.module.js';
     TasksModule,
     EmailModule,
     JwtHelperModule,
-    FileUploadModule
+    FileUploadModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthGuard],

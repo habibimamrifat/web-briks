@@ -5,6 +5,7 @@ import { AppModule } from './app.module.js';
 import { seed } from '../prisma/seed.js';
 import { setupSwagger } from './helpers/swagger/swagger.js';
 import { AppValidationPipe } from './pipe/validation.pipe.js';
+import { HttpExceptionFilter } from './filter/http-exception.filter.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,6 +19,7 @@ async function bootstrap() {
   app.useGlobalPipes(AppValidationPipe);
 
   setupSwagger(app);
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(process.env.PORT ?? 3000);
   await seed();

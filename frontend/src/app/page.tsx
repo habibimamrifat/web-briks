@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { callApis } from '@/apis/callApi';
-
 
 export default function Home() {
   const router = useRouter();
@@ -33,16 +33,18 @@ export default function Home() {
         },
       );
 
-      const storeData= {
+      const storeData = {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
-      }
-      // console.log('Storing auth data in localStorage:', storeData);
+      };
 
-      const stringifiedData = JSON.stringify(storeData);
-      // console.log('Stringified auth data:', stringifiedData);
+      const stringifiedData =
+        JSON.stringify(storeData);
 
-      localStorage.setItem('webBriksAuth', stringifiedData);
+      localStorage.setItem(
+        'webBriksAuth',
+        stringifiedData,
+      );
 
       router.push('/dashboard');
     } catch {
@@ -78,7 +80,9 @@ export default function Home() {
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
             className="w-full rounded-lg border border-gray-300 p-2.5 text-gray-900 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
             placeholder="admin@example.com"
             required
@@ -97,11 +101,22 @@ export default function Home() {
             id="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
             className="w-full rounded-lg border border-gray-300 p-2.5 text-gray-900 outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
             placeholder="••••••••"
             required
           />
+        </div>
+
+        <div className="text-right">
+          <Link
+            href="/forgetpassword"
+            className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         {error && (
