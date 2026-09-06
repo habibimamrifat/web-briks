@@ -12,16 +12,14 @@ export default function CreateUserPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] =
-    useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [result, setResult] = useState<{
-    type: "success" | "error";
+    type: "error";
     message: string;
   } | null>(null);
 
-  const [submitting, setSubmitting] =
-    useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleImageChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -41,13 +39,6 @@ export default function CreateUserPage() {
   ) => {
     e.preventDefault();
 
-    console.log("Submitting form with data:", {
-      name,
-      email,
-      password,
-      image,
-    });
-
     try {
       setSubmitting(true);
 
@@ -61,25 +52,14 @@ export default function CreateUserPage() {
         formData.append("image", image);
       }
 
-      console.log(
-        "IMAGE FROM FORMDATA:",
-        formData.get("image"),
-      );
-
-      await callApis(
-        "/users",
-        "CreateUserPage",
-        {
-          method: "POST",
-          body: formData,
-          requiredAuth: true,
-        },
-      );
-
-      setResult({
-        type: "success",
-        message: "User created successfully.",
+      await callApis("/users", "CreateUserPage", {
+        method: "POST",
+        body: formData,
+        requiredAuth: true,
       });
+
+      // Redirect immediately after successful user creation
+      router.push("/dashboard/users");
     } catch (error) {
       const message =
         error instanceof Error
@@ -95,15 +75,6 @@ export default function CreateUserPage() {
     }
   };
 
-  const handleResultClose = () => {
-    if (result?.type === "success") {
-      router.push("/dashboard/users");
-      return;
-    }
-
-    setResult(null);
-  };
-
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
       <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
@@ -117,10 +88,7 @@ export default function CreateUserPage() {
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="name"
@@ -133,9 +101,7 @@ export default function CreateUserPage() {
               id="name"
               type="text"
               value={name}
-              onChange={(e) =>
-                setName(e.target.value)
-              }
+              onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
@@ -154,9 +120,7 @@ export default function CreateUserPage() {
               id="email"
               type="email"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="john@example.com"
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
@@ -171,9 +135,7 @@ export default function CreateUserPage() {
               Password
 
               <h6 className="ml-1 text-sm font-normal text-gray-500">
-                (This password will be
-                changed by the user after
-                first login)
+                (This password will be changed by the user after first login)
               </h6>
             </label>
 
@@ -181,9 +143,7 @@ export default function CreateUserPage() {
               id="password"
               type="password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
@@ -234,43 +194,16 @@ export default function CreateUserPage() {
             disabled={submitting}
             className="w-full rounded-lg bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting
-              ? "Creating..."
-              : "Create User"}
+            {submitting ? "Creating..." : "Create User"}
           </button>
         </form>
-      </div>
 
-      {/* Result Modal */}
-      {result && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="text-xl font-bold text-gray-900">
-              {result.type === "success"
-                ? "Success"
-                : "Failed"}
-            </h2>
-
-            <p className="mt-3 text-gray-600">
-              {result.message}
-            </p>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={handleResultClose}
-                className={`rounded-lg px-5 py-2 text-sm font-semibold text-white ${
-                  result.type === "success"
-                    ? "bg-gray-900 hover:bg-gray-800"
-                    : "bg-red-600 hover:bg-red-700"
-                }`}
-              >
-                OK
-              </button>
-            </div>
+        {result && (
+          <div className="mt-5 rounded-lg bg-red-50 p-4 text-sm text-red-600">
+            {result.message}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
