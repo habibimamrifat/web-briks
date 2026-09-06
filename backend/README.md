@@ -1,98 +1,383 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Web Briks
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A full-stack Kanban board application built with **Next.js**, **NestJS**, **PostgreSQL**, **Prisma**, and **Docker**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+# Prerequisites
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Make sure you have installed:
 
-## Project setup
+* Node.js 20+
+* npm
+* PostgreSQL
+* Docker & Docker Compose
+* Git
+
+---
+
+# Backend Setup
+
+## 1. Navigate to the backend
 
 ```bash
-$ npm install
+cd backend
 ```
 
-## Compile and run the project
+## 2. Install dependencies
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+## 3. Create environment file
+
+Create:
+
+```text
+backend/development.env
+```
+
+Add:
+
+```env
+NODE_ENV=development
+
+PORT=3000
+
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/web_briks
+
+FRONTEND_URL=http://localhost:3001
+
+JWT_SECRET=your_jwt_secret
+JWT_RESET_SECRET=your_reset_secret
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_gmail_address
+SMTP_PASSWORD=your_gmail_app_password
+SMTP_FROM=your_gmail_address
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
+
+> Never commit your environment file or SMTP credentials to Git.
+
+## 4. Generate Prisma Client
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npx prisma generate
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 5. Run database migrations
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npx prisma migrate deploy
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+For local development when creating a new migration:
 
-## Resources
+```bash
+npx prisma migrate dev
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## 6. Start the backend
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npm run start:dev
+```
 
-## Support
+Backend:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```text
+http://localhost:3000
+```
 
-## Stay in touch
+API documentation:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```text
+http://localhost:3000/api/v1
+```
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Frontend Setup
+
+## 1. Navigate to the frontend
+
+From the project root:
+
+```bash
+cd frontend
+```
+
+## 2. Install dependencies
+
+```bash
+npm install
+```
+
+## 3. Create environment file
+
+Create:
+
+```text
+frontend/.env.local
+```
+
+Add:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+> `NEXT_PUBLIC_*` variables are exposed to the browser. Do not put secrets in them.
+
+## 4. Start the frontend
+
+```bash
+npm run dev
+```
+
+Frontend:
+
+```text
+http://localhost:3001
+```
+
+---
+
+# Docker Setup
+
+The project includes Docker Compose for running the complete application locally.
+
+From the project root:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+```text
+Frontend    → http://localhost:3001
+Backend     → http://localhost:3000
+PostgreSQL  → localhost:5432
+```
+
+To stop the containers:
+
+```bash
+docker compose down
+```
+
+To stop the containers and remove the database volume:
+
+```bash
+docker compose down -v
+```
+
+> Removing the volume deletes the local PostgreSQL data.
+
+---
+
+# Gmail SMTP Configuration
+
+The application uses **Gmail SMTP with Nodemailer** for sending emails.
+
+For Gmail SMTP over port `587`:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+```
+
+`SMTP_PASSWORD` must be a **Google App Password**, not your normal Gmail account password.
+
+Example:
+
+```env
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-16-character-app-password
+SMTP_FROM=your-email@gmail.com
+```
+
+---
+
+# Production Deployment
+
+The application is deployed on **Render** using Docker.
+
+## Backend
+
+Create a Render Web Service with:
+
+```text
+Repository: web-briks
+Root Directory: backend
+Environment: Docker
+Dockerfile: Dockerfile
+Branch: main
+```
+
+Configure the following environment variables in Render:
+
+```env
+NODE_ENV=production
+
+PORT=3000
+
+DATABASE_URL=your_render_postgresql_internal_database_url
+
+FRONTEND_URL=https://your-frontend.onrender.com
+
+JWT_SECRET=your_jwt_secret
+JWT_RESET_SECRET=your_reset_secret
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_gmail_address
+SMTP_PASSWORD=your_gmail_app_password
+SMTP_FROM=your_gmail_address
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
+
+The backend Docker container runs Prisma migrations before starting the NestJS application.
+
+Backend:
+
+```text
+https://your-backend.onrender.com
+```
+
+API documentation:
+
+```text
+https://your-backend.onrender.com/api/v1
+```
+
+---
+
+# Frontend Production Deployment
+
+Create a second Render Web Service.
+
+Use:
+
+```text
+Repository: web-briks
+Root Directory: frontend
+Environment: Docker
+Dockerfile: Dockerfile
+Branch: main
+```
+
+Add:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
+```
+
+> `NEXT_PUBLIC_API_URL` is required during the Next.js build, so changing this variable requires a new frontend deployment/build.
+
+Frontend:
+
+```text
+https://your-frontend.onrender.com
+```
+
+---
+
+# Production Architecture
+
+```text
+                    ┌──────────────────────┐
+                    │      Next.js         │
+                    │      Frontend        │
+                    │       Render         │
+                    └──────────┬───────────┘
+                               │
+                               │ HTTP API
+                               ▼
+                    ┌──────────────────────┐
+                    │      NestJS          │
+                    │      Backend         │
+                    │       Render         │
+                    └──────┬───────┬───────┘
+                           │       │
+                ┌──────────┘       └──────────────┐
+                ▼                                 ▼
+       ┌─────────────────┐              ┌─────────────────┐
+       │   PostgreSQL    │              │    Cloudinary   │
+       │     Render      │              │  Image Storage  │
+       └─────────────────┘              └─────────────────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │   Gmail SMTP    │
+                  │   Port 587      │
+                  └─────────────────┘
+```
+
+---
+
+# Environment Variables
+
+## Backend
+
+The following variables are server-side and must never be exposed publicly:
+
+```text
+DATABASE_URL
+JWT_SECRET
+JWT_RESET_SECRET
+SMTP_PASSWORD
+CLOUDINARY_API_SECRET
+```
+
+## Frontend
+
+The frontend only requires:
+
+```env
+NEXT_PUBLIC_API_URL=...
+```
+
+Do not place private credentials inside `NEXT_PUBLIC_*` variables.
+
+---
+
+# Run Everything Locally
+
+The easiest way to run the complete application is:
+
+```bash
+docker compose up --build
+```
+
+Then access:
+
+```text
+Frontend:
+http://localhost:3001
+
+Backend:
+http://localhost:3000
+
+API Documentation:
+http://localhost:3000/api/v1
+```
+
+To stop:
+
+```bash
+docker compose down
+```
