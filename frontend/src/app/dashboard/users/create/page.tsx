@@ -59,6 +59,7 @@ export default function CreateUserPage() {
       });
 
       // Redirect immediately after successful user creation
+      console.log("cretion compleate")
       router.push("/dashboard/users");
     } catch (error) {
       const message =
