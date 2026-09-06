@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:18
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: web_briks
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d web_briks"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+
+    env_file:
+      - ./backend/development.env
+
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/web_briks"
+      FRONTEND_URL: "http://localhost:3001"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    command: sh -c "npx prisma migrate deploy && npm run start:prod"
+
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:3000"
+
+    environment:
+      NODE_ENV: development
+
+    ports:
+      - "3001:3000"
+
+volumes:
+  postgres_data:

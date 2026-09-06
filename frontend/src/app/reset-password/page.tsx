@@ -1,11 +1,12 @@
+
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { callApis } from '@/apis/callApi';
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -38,18 +39,14 @@ export default function ResetPassword() {
     try {
       setLoading(true);
 
-      await callApis(
-        '/auth/reset-password',
-        'ResetPasswordPage',
-        {
-          method: 'POST',
-          body: {
-            token,
-            password,
-          },
-          requiredAuth: false,
+      await callApis('/auth/reset-password', 'ResetPasswordPage', {
+        method: 'POST',
+        body: {
+          token,
+          password,
         },
-      );
+        requiredAuth: false,
+      });
 
       setMessage(
         'Password reset successfully. Redirecting to login...',
@@ -158,5 +155,13 @@ export default function ResetPassword() {
         </div>
       </form>
     </main>
+  );
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
