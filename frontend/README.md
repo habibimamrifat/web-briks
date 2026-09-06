@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Frontend Setup
 
-## Getting Started
+### 1. Go to the frontend directory
 
-First, run the development server:
+```bash
+cd frontend
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Create `.env.local`
+
+Create:
+
+```text
+frontend/.env.local
+```
+
+Add:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+> `NEXT_PUBLIC_API_URL` is the URL of the backend API.
+
+### 4. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The frontend will be available at:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3001
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Frontend Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+| Variable              | Description     |
+| --------------------- | --------------- |
+| `NEXT_PUBLIC_API_URL` | Backend API URL |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Local
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
 
-## Deploy on Vercel
+### Production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For Render deployment:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
+```
+
+---
+
+## Running Frontend with Docker
+
+From the project root:
+
+```bash
+docker compose up --build
+```
+
+The frontend will be available at:
+
+```text
+http://localhost:3001
+```
+
+The frontend Dockerfile receives the API URL during the Next.js build:
+
+```dockerfile
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+RUN npm run build
+```
+
+This is important because Next.js `NEXT_PUBLIC_*` environment variables are included in the frontend bundle during the build process.
+
+---
+
+## Production Deployment — Render
+
+Create a **Web Service** on Render using the same GitHub repository.
+
+Use these settings:
+
+```text
+Root Directory: frontend
+Language: Docker
+Dockerfile Path: Dockerfile
+Branch: main
+```
+
+Add the environment variable:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
+```
+
+Then deploy the service.
+
+The frontend communicates with the backend through:
+
+```text
+Frontend
+   ↓
+NEXT_PUBLIC_API_URL
+   ↓
+Backend API
+   ↓
+PostgreSQL
+```
+
+### Important
+
+Do not put secrets such as database passwords, JWT secrets, SMTP passwords, or Cloudinary secrets in the frontend environment.
+
+Only variables that are safe to expose to the browser should use the `NEXT_PUBLIC_` prefix.
